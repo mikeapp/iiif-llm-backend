@@ -32,12 +32,23 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
   statement {
     effect    = "Allow"
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = [var.secrets_resource]
+    resources = [var.secrets]
+  }
+  statement {
+    effect    = "Allow"
+    actions   = [
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:CreateNetworkInterface",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeInstances",
+      "ec2:AttachNetworkInterface"
+    ]
+    resources = ["*"]
   }
 }
 
 resource "aws_iam_role_policy" "lambda_api_policies" {
   name   = "sender_sqs_policy"
-  role   = aws_iam_role.lambda_api_role.arn
-  policy = data.aws_iam_policy_document.lambda_api_policy_document
+  role   = aws_iam_role.lambda_api_role.name
+  policy = data.aws_iam_policy_document.lambda_api_policy_document.json
 }

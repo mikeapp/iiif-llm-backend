@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.16"
+      version = "~> 5.31"
     }
   }
 
@@ -22,4 +22,4 @@ data "aws_region" "current" {
 variable "subnet_id" {}
 variable "sg_id" {}
 variable "db_url" {}
-variable "secrets_resource" {}
+variable "secrets" {}
