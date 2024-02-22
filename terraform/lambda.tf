@@ -26,7 +26,7 @@ resource "aws_lambda_function" "my_lambda_function" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
   function_name    = "llm_iiif_api_lambda"
   role             = aws_iam_role.lambda_api_role.arn
-  handler          = "my_lambda_function.lambda_handler"
+  handler          = "api_handler.lambda_handler"
   runtime          = "python3.8"
   layers           = [aws_lambda_layer_version.python_layer.arn]
 }
