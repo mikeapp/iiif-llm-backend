@@ -1,3 +1,5 @@
 .idea
 
 python_layer/python
+terraform/.terraform
+terraform/.terraform.lock.hcl
