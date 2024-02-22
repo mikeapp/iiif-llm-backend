@@ -21,3 +21,23 @@ resource "aws_iam_role_policy_attachment" "basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   role       = aws_iam_role.lambda_api_role.name
 }
+
+# Additional Lambda policy
+data "aws_iam_policy_document" "lambda_api_policy_document" {
+  statement {
+    effect    = "Allow"
+    actions   = ["bedrock:InvokeModel"]
+    resources = ["arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-text-express-v1"]
+  }
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [var.secrets_resource]
+  }
+}
+
+resource "aws_iam_role_policy" "lambda_api_policies" {
+  name   = "sender_sqs_policy"
+  role   = aws_iam_role.lambda_api_role.arn
+  policy = data.aws_iam_policy_document.lambda_api_policy_document
+}

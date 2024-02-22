@@ -22,3 +22,4 @@ data "aws_region" "current" {
 variable "subnet_id" {}
 variable "sg_id" {}
 variable "db_url" {}
+variable "secrets_resource" {}
