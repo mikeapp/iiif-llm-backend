@@ -29,4 +29,14 @@ resource "aws_lambda_function" "my_lambda_function" {
   handler          = "api_handler.lambda_handler"
   runtime          = "python3.8"
   layers           = [aws_lambda_layer_version.python_layer.arn]
+  environment {
+    variables = {
+      "db" : var.db_url,
+      "username" : "ai_user"
+    }
+  }
+  vpc_config {
+    subnet_ids         = [var.subnet_id]
+    security_group_ids = [var.sg_id]
+  }
 }

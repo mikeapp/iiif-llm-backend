@@ -17,3 +17,8 @@ provider "aws" {
 data "aws_region" "current" {
   provider = aws.current
 }
+
+
+variable "subnet_id" {}
+variable "sg_id" {}
+variable "db_url" {}
