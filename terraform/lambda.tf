@@ -28,7 +28,7 @@ resource "aws_lambda_function" "ai-api-lambda" {
   role             = aws_iam_role.lambda_api_role.arn
   handler          = "api_handler.lambda_handler"
   runtime          = "python3.12"
-  layers           = [aws_lambda_layer_version.python_layer.arn]
+  layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
   timeout          = 25
   environment {
     variables = {
