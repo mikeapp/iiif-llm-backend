@@ -12,6 +12,14 @@ def get_connection():
         ssl_context=True)
 
 
+def result_to_dict(cursor, rows):
+    keys = [k[0] for k in cursor.description]
+    result = {}
+    for index, row in enumerate(rows):
+        result[keys[index]] = row
+    return result
+
+
 # Users
 def create_user_record(conn, username, email_address, credits):
     cursor = conn.cursor()
@@ -29,7 +37,6 @@ def create_user_record(conn, username, email_address, credits):
     finally:
         # Close the cursor and connection
         cursor.close()
-        conn.close()
 
 def get_user_by_username(conn, username):
     try:
@@ -38,7 +45,7 @@ def get_user_by_username(conn, username):
         cursor.execute(sql, (username,))
         user_record = cursor.fetchone()
         if user_record:
-            return user_record
+            return result_to_dict(cursor, user_record)
         else:
             print("User not found.")
     except Exception as e:
@@ -56,7 +63,7 @@ def get_credits_used_by_username(conn, username):
         cursor.execute(sql, (username,))
         credits_used = cursor.fetchone()
         if credits_used:
-            return credits_used
+            return result_to_dict(cursor, credits_used)
         else:
             print("UserCreditsUsed not found.")
     except Exception as e:
@@ -103,7 +110,7 @@ def get_ocr(conn, image_id, object_id, text_engine='Textract'):
         cursor.execute(sql, (image_id, object_id, text_engine))
         record = cursor.fetchone()
         if record:
-            return record
+            return result_to_dict(cursor, record)
         else:
             print("Record not found.")
     except Exception as e:
@@ -121,7 +128,7 @@ def get_generic_prompt_by_key(conn, prompt_key):
         cursor.execute(sql, (prompt_key,))
         prompt_record = cursor.fetchone()
         if prompt_record:
-            return prompt_record
+            return result_to_dict(cursor, prompt_record)
         else:
             print("Prompt not found.")
     except Exception as e:
@@ -135,9 +142,9 @@ def get_generic_prompts(conn):
         cursor = conn.cursor()
         sql = """SELECT * FROM generic_prompts ORDER BY prompt_label"""
         cursor.execute(sql)
-        prompt_record = cursor.fetchone()
-        if prompt_record:
-            return prompt_record
+        prompt_records = cursor.fetchall()
+        if prompt_records:
+            return result_to_dict(cursor, prompt_records)
         else:
             print("Prompts not found.")
     except Exception as e:

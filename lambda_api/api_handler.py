@@ -9,15 +9,35 @@ from chatgpt import call_gpt
 from titan import call_titan
 import boto3
 
+
 def lambda_handler(event, context):
+    # object_id = event['object_id']
+    # image_ids = event['image_ids']
+    # prompt_id = event['prompt_id']
+    username = event['username']
+    email = event['email']
+
     conn = get_connection()
-    # message = create_user_record(conn,"mikea", "michael.appleby@yale.edu", 500)
-    insert_activity_record(conn, 'mikea', 'https://foo/bar/123', "ChatGPT", 2)
-    user = get_user_by_username(conn, 'mikea')
-    credits_used = get_credits_used_by_username(conn, 'mikea')
+
+    # load or create user
+    user = get_user_by_username(conn, username)
+    if user is None:
+        create_user_record(conn, username, email, 500)
+        user = get_user_by_username(conn, username)
+
+    # check credit balance
+    credits_used_user = get_credits_used_by_username(conn, 'mikea')
+    credits_used = 0
+    if credits_used_user:
+        credits_used = credits_used_user['credits_used']
+    if credits_used_user > user['credits']:
+        return {"error": "Credit limit exceeded"}
 
     gpt_completion = ""  # call_gpt("Please translate this Latin text", "nautae dant dona feminis")
     titan_completion = "" # call_titan("what is the answer?", " 2 * 2")
+
+    insert_activity_record(conn, 'mikea', 'https://foo/bar/123', "ChatGPT", 2)
+
     return {
         'user': user,
         'credits_used': credits_used,
