@@ -55,3 +55,4 @@ GRANT ALL ON ocr TO aiuser;
 GRANT ALL ON generic_prompts TO aiuser;
 GRANT ALL ON prompts  TO aiuser;
 GRANT SELECT ON user_credits_used TO aiuser;
+GRANT USAGE ON SEQUENCE activities_activity_id_seq TO aiuser;
