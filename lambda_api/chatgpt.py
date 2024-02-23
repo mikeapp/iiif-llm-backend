@@ -1,32 +1,13 @@
 import json
-import boto3
 import urllib
-
+from shared_lib import get_secret
 from botocore.exceptions import ClientError
-
-
-def get_gpt_api_key():
-    secret_name = "ai/chatGPT"
-    region_name = "us-east-1"
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        raise e
-    response = json.loads(get_secret_value_response['SecretString'])
-    return response['key']
 
 
 def call_gpt(prompt,text):
     response_body = []
     api_url = "https://api.openai.com/v1/chat/completions"
-    api_key = get_gpt_api_key()
+    api_key = get_secret("ai/chatGPT")["key"]
     if not api_key.endswith('b'):
         raise RuntimeError("Problem with API key: " + api_key[0:5])
     try:
