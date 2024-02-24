@@ -4,7 +4,8 @@ from database import (create_user_record,
                       insert_activity_record,
                       get_credits_used_by_username,
                       get_ocr,
-                      get_generic_prompt_by_key)
+                      get_generic_prompt_by_key,
+                      find_or_create_user)
 from shared_lib import (filter_array_uris, map_manifest)
 import boto3
 
@@ -26,26 +27,19 @@ def lambda_handler(event, context):
     image_ids = filter_array_uris(event['image_ids'])
 
     conn = get_connection()
+    user = find_or_create_user(event, conn)
+
     new_image_ids = get_unprocessed_uris(conn, object_id, image_ids)
     cost = len(new_image_ids)
-
-    username = event['username']
-    email = event['email']
-    # load or create user
-    user = get_user_by_username(conn, username)
-    if user is None:
-        create_user_record(conn, username, email, 500)
-        user = get_user_by_username(conn, username)
-
     # check credit balance
-    credits_used_user = get_credits_used_by_username(conn, username)
+    credits_used_user = get_credits_used_by_username(conn, user['username'])
     credits_used = 0
     if credits_used_user:
         credits_used = credits_used_user['credits_used']
     if credits_used + cost > user['credits']:
         return {"error": "Operation would exceed credit limit"}
 
-    insert_activity_record(conn, username, object_id, "TEXTRACT", cost)
+    insert_activity_record(conn, user['username'], object_id, "TEXTRACT", cost)
 
     job_id = 'stepfunction123'
 

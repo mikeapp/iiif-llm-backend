@@ -1,7 +1,9 @@
 import pg8000
 from shared_lib import get_secret
 
+DEFAULT_CREDITS = 500
 
+# Utitliy
 def get_connection():
     credentials = get_secret("ai/database")
     return pg8000.connect(
@@ -19,6 +21,16 @@ def result_to_dict(cursor, rows):
         result[keys[index]] = row
     return result
 
+
+# Convenience
+def find_or_create_user(event, conn):
+    username = event['username']
+    user = get_user_by_username(conn, username)
+    if user is None:
+        email = event['email_address']
+        create_user_record(conn, username, email, DEFAULT_CREDITS)
+        user = get_user_by_username(conn, username)
+    return user
 
 # Users
 def create_user_record(conn, username, email_address, credits):

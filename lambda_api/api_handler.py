@@ -4,7 +4,8 @@ from database import (create_user_record,
                       insert_activity_record,
                       get_credits_used_by_username,
                       get_ocr,
-                      get_generic_prompt_by_key)
+                      get_generic_prompt_by_key,
+                      find_or_create_user)
 from chatgpt import call_gpt
 from titan import call_titan
 import boto3
@@ -14,16 +15,8 @@ def lambda_handler(event, context):
     # object_id = event['object_id']
     # image_ids = event['image_ids']
     # prompt_id = event['prompt_id']
-    username = event['username']
-    email = event['email']
-
     conn = get_connection()
-
-    # load or create user
-    user = get_user_by_username(conn, username)
-    if user is None:
-        create_user_record(conn, username, email, 500)
-        user = get_user_by_username(conn, username)
+    user = find_or_create_user(event, conn)
 
     # check credit balance
     credits_used_user = get_credits_used_by_username(conn, username)
