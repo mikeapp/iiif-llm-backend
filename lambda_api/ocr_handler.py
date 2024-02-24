@@ -41,11 +41,16 @@ def lambda_handler(event, context):
 
     insert_activity_record(conn, user['username'], object_id, "TEXTRACT", cost)
 
+    job_input = {
+        'object_id': object_id,
+        'image_ids': new_image_ids
+    }
     job_id = 'stepfunction123'
 
     return {
         'user': user,
         'credits_used': cost,
+        'object_id': object_id,
         'new_image_ids': new_image_ids,
         'job_id': job_id
     }

@@ -1,0 +1,90 @@
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "Download Images",
+  "States": {
+    "Download Images": {
+      "Type": "Map",
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "Download to S3",
+        "States": {
+          "Download to S3": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "OutputPath": "$.Payload",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "${s3_copy_lambda}:$LATEST"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2
+              }
+            ],
+            "End": true
+          }
+        }
+      },
+      "ItemsPath": "$.image_ids",
+      "ItemSelector": {
+        "object_id.$": "$.object_id",
+        "uri.$": "$$.Map.Item.Value",
+        "filename.$": "States.Base64Encode($$.Map.Item.Value)"
+      },
+      "ResultPath": null,
+      "Next": "Text Extraction",
+      "MaxConcurrency": 8
+    },
+    "Text Extraction": {
+      "Type": "Map",
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "Textract",
+        "States": {
+          "Textract": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "OutputPath": "$.Payload",
+            "Parameters": {
+              "Payload.$": "$",
+              "FunctionName": "${textract_lambda}:$LATEST"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "Lambda.ServiceException",
+                  "Lambda.AWSLambdaException",
+                  "Lambda.SdkClientException",
+                  "Lambda.TooManyRequestsException"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "BackoffRate": 2
+              }
+            ],
+            "End": true
+          }
+        }
+      },
+      "End": true,
+      "ItemsPath": "$.image_ids",
+      "ItemSelector": {
+        "object_id.$": "$.object_id",
+        "image_id.$": "$$.Map.Item.Value",
+        "filename.$": "States.Base64Encode($$.Map.Item.Value)"
+      }
+    }
+  }
+}

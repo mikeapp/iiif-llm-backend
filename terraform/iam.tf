@@ -40,8 +40,8 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
     resources = ["*"]
   }
   statement {
-    effect    = "Allow"
-    actions   = [
+    effect = "Allow"
+    actions = [
       "ec2:DescribeNetworkInterfaces",
       "ec2:CreateNetworkInterface",
       "ec2:DeleteNetworkInterface",
@@ -51,14 +51,14 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
     resources = ["*"]
   }
   statement {
-    effect    = "Allow"
-    actions   = ["s3:PutObject",
+    effect = "Allow"
+    actions = ["s3:PutObject",
       "s3:GetObjectAcl",
       "s3:GetObject",
       "s3:GetObjectAttributes",
       "s3:GetObjectTagging",
-      "s3:DeleteObject"]
-    resources = [ "${aws_s3_bucket.tmp_bucket.arn}/*" ]
+    "s3:DeleteObject"]
+    resources = ["${aws_s3_bucket.tmp_bucket.arn}/*"]
   }
 }
 
@@ -66,4 +66,46 @@ resource "aws_iam_role_policy" "lambda_api_policies" {
   name   = "sender_sqs_policy"
   role   = aws_iam_role.lambda_api_role.name
   policy = data.aws_iam_policy_document.lambda_api_policy_document.json
+}
+
+# Role for Stap Functions
+data "aws_iam_policy_document" "state_machine_assume_role_policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["states.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "state_machine_role_policy" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+
+    resources = [
+      "${aws_lambda_function.ai-api-s3-copy.arn}:*",
+      "${aws_lambda_function.ai-api-textract.arn}:*"
+    ]
+  }
+
+}
+
+resource "aws_iam_role" "ai-api-text-step-function-role" {
+  name               = "ai-api-text-step-function-role"
+  assume_role_policy = data.aws_iam_policy_document.state_machine_assume_role_policy.json
+}
+
+resource "aws_iam_role_policy" "ai-api-text-step-function-role-policy" {
+  role   = aws_iam_role.ai-api-text-step-function-role.id
+  policy = data.aws_iam_policy_document.state_machine_role_policy.json
 }

@@ -28,3 +28,14 @@ variable "secrets" {}
 resource "aws_s3_bucket" "tmp_bucket" {
   bucket = "iiif-api-temp"
 }
+
+# Step function
+resource "aws_sfn_state_machine" "ai-api-state-machine" {
+  name     = "ai-api-text-state-machine"
+  role_arn = aws_iam_role.ai-api-text-step-function-role.arn
+  definition = templatefile("text_state_machine.tftp1", {
+    s3_copy_lambda = aws_lambda_function.ai-api-s3-copy.function_name,
+    textract_lambda    = aws_lambda_function.ai-api-textract.function_name
+  })
+}
+
