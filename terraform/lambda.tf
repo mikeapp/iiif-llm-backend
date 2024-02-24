@@ -51,3 +51,28 @@ resource "aws_lambda_function" "ai-api-ocr" {
     security_group_ids = [var.sg_id]
   }
 }
+
+
+# Bundle Lambda code for S3 Copy
+data "archive_file" "lambda_s3" {
+  type        = "zip"
+  output_path = "/tmp/lambda_s3_copy_dir.zip"
+  source_dir  = "../lambda_s3_copy"
+}
+
+resource "aws_lambda_function" "ai-api-s3-copy" {
+  filename         = data.archive_file.lambda_s3.output_path
+  source_code_hash = data.archive_file.lambda_s3.output_base64sha256
+  function_name    = "ai-api-s3-copy"
+  role             = aws_iam_role.lambda_api_role.arn
+  handler          = "s3_copy.lambda_handler"
+  runtime          = "python3.12"
+  layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
+  timeout          = 25
+  environment {
+    variables = {
+      "s3_bucket" : aws_s3_bucket.tmp_bucket.id
+    }
+  }
+}
+

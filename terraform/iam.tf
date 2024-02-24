@@ -45,6 +45,16 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
     ]
     resources = ["*"]
   }
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:PutObject",
+      "s3:GetObjectAcl",
+      "s3:GetObject",
+      "s3:GetObjectAttributes",
+      "s3:GetObjectTagging",
+      "s3:DeleteObject"]
+    resources = [ "${aws_s3_bucket.tmp_bucket.arn}/*" ]
+  }
 }
 
 resource "aws_iam_role_policy" "lambda_api_policies" {

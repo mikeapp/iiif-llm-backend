@@ -23,3 +23,8 @@ variable "subnet_id" {}
 variable "sg_id" {}
 variable "db_url" {}
 variable "secrets" {}
+
+# S3 bucket
+resource "aws_s3_bucket" "tmp_bucket" {
+  bucket = "iiif-api-temp"
+}
