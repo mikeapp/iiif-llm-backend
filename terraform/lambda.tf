@@ -20,7 +20,7 @@ data "archive_file" "lambda" {
   source_dir  = "../lambda_api"
 }
 
-# Create a Lambda
+# LLM API handler
 resource "aws_lambda_function" "ai-api-lambda" {
   filename         = data.archive_file.lambda.output_path
   source_code_hash = data.archive_file.lambda.output_base64sha256
@@ -30,12 +30,22 @@ resource "aws_lambda_function" "ai-api-lambda" {
   runtime          = "python3.12"
   layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
   timeout          = 25
-  environment {
-    variables = {
-      "db" : var.db_url,
-      "username" : "ai_user"
-    }
+  vpc_config {
+    subnet_ids         = [var.subnet_id]
+    security_group_ids = [var.sg_id]
   }
+}
+
+# OCR Handler
+resource "aws_lambda_function" "ai-api-ocr" {
+  filename         = data.archive_file.lambda.output_path
+  source_code_hash = data.archive_file.lambda.output_base64sha256
+  function_name    = "ai-api-ocr"
+  role             = aws_iam_role.lambda_api_role.arn
+  handler          = "ocr_handler.lambda_handler"
+  runtime          = "python3.12"
+  layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
+  timeout          = 25
   vpc_config {
     subnet_ids         = [var.subnet_id]
     security_group_ids = [var.sg_id]

@@ -43,7 +43,7 @@ def map_manifest(uri):
                 service = anno['body']['service'][0]
                 image = service['@id']
                 canvases.append({
-                    'imageId': image,
+                    'image_id': image,
                     'id': canvas['id']
                 })
         statusCode = 200
