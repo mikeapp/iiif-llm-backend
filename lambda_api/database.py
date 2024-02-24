@@ -115,7 +115,7 @@ def insert_ocr_record(conn, image_id, object_id, text_engine='TEXTRACT', text_co
         cursor.close()
 
 
-def get_ocr(conn, image_id, object_id, text_engine='Textract'):
+def get_ocr(conn, image_id, object_id, text_engine='TEXTRACT'):
     try:
         cursor = conn.cursor()
         sql = """SELECT * FROM ocr WHERE image_id = %s AND object_id = %s AND text_engine = %s"""
@@ -125,6 +125,7 @@ def get_ocr(conn, image_id, object_id, text_engine='Textract'):
             return result_to_dict(cursor, record)
         else:
             print("Record not found.")
+            return None
     except Exception as e:
         print("Error:", e)
     finally:

@@ -40,6 +40,11 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
     resources = ["*"]
   }
   statement {
+    effect    = "Allow"
+    actions   = ["states:StartExecution"]
+    resources = [aws_sfn_state_machine.ai-api-state-machine.arn]
+  }
+  statement {
     effect = "Allow"
     actions = [
       "ec2:DescribeNetworkInterfaces",

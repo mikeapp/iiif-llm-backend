@@ -46,6 +46,11 @@ resource "aws_lambda_function" "ai-api-ocr" {
   runtime          = "python3.12"
   layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
   timeout          = 25
+  environment {
+    variables = {
+      "state_machine" : aws_sfn_state_machine.ai-api-state-machine.arn
+    }
+  }
   vpc_config {
     subnet_ids         = [var.subnet_id]
     security_group_ids = [var.sg_id]
