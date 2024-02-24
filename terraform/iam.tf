@@ -36,6 +36,11 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
   }
   statement {
     effect    = "Allow"
+    actions   = ["textract:DetectDocumentText"]
+    resources = ["*"]
+  }
+  statement {
+    effect    = "Allow"
     actions   = [
       "ec2:DescribeNetworkInterfaces",
       "ec2:CreateNetworkInterface",
