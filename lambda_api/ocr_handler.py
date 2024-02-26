@@ -35,11 +35,14 @@ def start_state_machine(input):
 
 
 def lambda_handler(event, context):
-    object_id = event['object_id']
-    image_ids = filter_array_uris(event['image_ids'])
+    body = {}
+    if (event['body']) and (event['body'] is not None):
+        body = json.loads(event['body'])
+    object_id = body['object_id']
+    image_ids = filter_array_uris(body['image_ids'])
 
     conn = get_connection()
-    user = find_or_create_user(event, conn)
+    user = find_or_create_user(body, conn)
 
     cost = None
     job_id = None
@@ -62,10 +65,16 @@ def lambda_handler(event, context):
         }
         job_id = start_state_machine(job_input)
 
-    return {
+    response = {
         'user': user,
         'credits_used': cost,
         'object_id': object_id,
         'new_image_ids': new_image_ids,
         'job_id': job_id
+    }
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps(response),
+        "isBase64Encoded": False
     }
