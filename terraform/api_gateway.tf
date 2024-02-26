@@ -15,7 +15,7 @@ resource "aws_api_gateway_resource" "api" {
 
 
 
-resource "aws_api_gateway_resource" "api" {
+resource "aws_api_gateway_resource" "model" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_resource.api.id
   path_part   = "model"
@@ -35,17 +35,17 @@ resource "aws_api_gateway_resource" "prompt" {
 
 # /model
 
-resource "aws_api_gateway_method" "api" {
+resource "aws_api_gateway_method" "model" {
   rest_api_id      = aws_api_gateway_rest_api.api.id
-  resource_id      = aws_api_gateway_resource.ocr.id
+  resource_id      = aws_api_gateway_resource.model.id
   api_key_required = false
   http_method      = "POST"
   authorization    = "NONE"
 }
 
-resource "aws_api_gateway_integration" "api" {
+resource "aws_api_gateway_integration" "model" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.api.id
+  resource_id             = aws_api_gateway_resource.model.id
   http_method             = "POST"
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
@@ -85,7 +85,7 @@ resource "aws_api_gateway_method" "prompt" {
   authorization    = "NONE"
 }
 
-resource "aws_api_gateway_integration" "api" {
+resource "aws_api_gateway_integration" "prompt" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.prompt.id
   http_method             = "POST"
