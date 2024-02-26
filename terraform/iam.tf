@@ -178,18 +178,6 @@ resource "aws_iam_policy" "api" {
           "logs:FilterLogEvents"
         ],
         "Resource": "*"
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "sqs:SendMessage"
-        ],
-        "Resource": "${aws_sqs_queue.queue.arn}"
-      },
-      {
-        "Effect": "Allow",
-        "Action": "sqs:ListQueues",
-        "Resource": "*"
       }
     ]
 }

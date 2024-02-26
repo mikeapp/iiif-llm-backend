@@ -19,7 +19,7 @@ resource "aws_api_gateway_resource" "ocr" {
   path_part   = "model"
 }
 
-resource "aws_api_gateway_resource" "ocr" {
+resource "aws_api_gateway_resource" "prompt" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_resource.api.id
   path_part   = "prompt"
