@@ -3,6 +3,16 @@ from shared_lib import get_secret
 
 DEFAULT_CREDITS = 500
 
+def auth_user(cognito):
+    username = cognito['username']
+    groups = cognito['groups']
+    TARGET_GROUP = 'ai-user'
+    if isinstance(groups, str) and (groups == TARGET_GROUP):
+        return username
+    if isinstance(groups, list) and TARGET_GROUP in groups:
+        return username
+    raise Exception('User not in authorized group')
+
 # Utitliy
 def get_connection():
     credentials = get_secret("ai/database")
@@ -21,13 +31,18 @@ def result_to_dict(cursor, rows):
         result[keys[index]] = row
     return result
 
+def list_to_dicts(cursor, list):
+    result = []
+    for item in list:
+        result.append(result_to_dict(cursor, item))
+    return result
 
 # Convenience
 def find_or_create_user(event, conn):
     username = event['username']
     user = get_user_by_username(conn, username)
     if user is None:
-        email = event['email_address']
+        email = event['email']
         create_user_record(conn, username, email, DEFAULT_CREDITS)
         user = get_user_by_username(conn, username)
     return user
@@ -137,7 +152,7 @@ def get_ocr(conn, image_id, object_id, text_engine='TEXTRACT'):
 def get_generic_prompt_by_key(conn, prompt_key):
     try:
         cursor = conn.cursor()
-        sql = """SELECT * FROM generic_prompts WHERE prompt_key = %s"""
+        sql = """SELECT prompt_key, prompt_label, prompt_description, prompt_text FROM generic_prompts WHERE prompt_key = %s"""
         cursor.execute(sql, (prompt_key,))
         prompt_record = cursor.fetchone()
         if prompt_record:
@@ -153,11 +168,11 @@ def get_generic_prompt_by_key(conn, prompt_key):
 def get_generic_prompts(conn):
     try:
         cursor = conn.cursor()
-        sql = """SELECT * FROM generic_prompts ORDER BY prompt_label"""
+        sql = """SELECT prompt_key, prompt_label, prompt_description, prompt_text FROM generic_prompts ORDER BY prompt_label"""
         cursor.execute(sql)
         prompt_records = cursor.fetchall()
         if prompt_records:
-            return result_to_dict(cursor, prompt_records)
+            return list_to_dicts(cursor, prompt_records)
         else:
             print("Prompts not found.")
     except Exception as e:

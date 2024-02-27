@@ -1,5 +1,4 @@
-from database import (create_user_record,
-                      get_user_by_username,
+from database import (auth_user,
                       get_connection,
                       insert_activity_record,
                       get_credits_used_by_username,
@@ -10,6 +9,7 @@ from shared_lib import (filter_array_uris, map_manifest)
 import boto3
 import json
 import os
+
 
 def get_unprocessed_uris(conn, object_id, image_ids):
     if not object_id.startswith('https://collections.library.yale.edu/manifests/'):
@@ -23,6 +23,7 @@ def get_unprocessed_uris(conn, object_id, image_ids):
     unprocessed_image_ids = list(filter(lambda image_id: not get_ocr(conn, image_id, object_id), valid_image_ids))
     return unprocessed_image_ids
 
+
 def start_state_machine(input):
     session = boto3.Session()
     step_client = session.client('stepfunctions')
@@ -35,14 +36,13 @@ def start_state_machine(input):
 
 
 def lambda_handler(event, context):
-    body = {}
-    if (event['body']) and (event['body'] is not None):
-        body = json.loads(event['body'])
+    body = event['body']
     object_id = body['object_id']
     image_ids = filter_array_uris(body['image_ids'])
-
+    cognito = event['cognito']
+    auth_user(cognito)
     conn = get_connection()
-    user = find_or_create_user(body, conn)
+    user = find_or_create_user(cognito, conn)
 
     cost = None
     job_id = None
@@ -73,8 +73,4 @@ def lambda_handler(event, context):
         'job_id': job_id
     }
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response),
-        "isBase64Encoded": False
-    }
+    return response

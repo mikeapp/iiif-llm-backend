@@ -1,9 +1,6 @@
 # Backend for IIIF LLM Workbench
 
-
 TODO:
-- Check user group
-- Prompt list
 - Build document from _ocr_ table
 - Turn on model calls
 

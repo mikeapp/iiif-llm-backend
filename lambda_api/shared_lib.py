@@ -3,6 +3,15 @@ import os
 import urllib
 import urllib.request
 
+def auth_user(cognito):
+    username = cognito['username']
+    groups = cognito['groups']
+    TARGET_GROUP = 'ai-user'
+    if isinstance(groups, str) and (groups == TARGET_GROUP):
+        return True
+    if isinstance(groups, list) and TARGET_GROUP in groups:
+        return True
+    return False
 
 def filter_array_uris(arr):
     if type(arr) != list:

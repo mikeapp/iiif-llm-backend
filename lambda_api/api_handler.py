@@ -5,6 +5,7 @@ from database import (create_user_record,
                       get_credits_used_by_username,
                       get_ocr,
                       get_generic_prompt_by_key,
+                      auth_user,
                       find_or_create_user)
 from chatgpt import call_gpt
 from titan import call_titan
@@ -13,14 +14,15 @@ import json
 
 
 def lambda_handler(event, context):
-    body = {}
-    if (event['body']) and (event['body'] is not None):
-        body = json.loads(event['body'])
+    body = event['body']
     object_id = body['object_id']
     # image_ids = event['image_ids']
     # prompt_id = event['prompt_id']
+    cognito = event['cognito']
+
+    auth_user(event)
     conn = get_connection()
-    user = find_or_create_user(body, conn)
+    user = find_or_create_user(cognito, conn)
 
     # check credit balance
     credits_used_user = get_credits_used_by_username(conn, user['username'])

@@ -59,7 +59,12 @@ resource "aws_api_gateway_integration" "model" {
   request_templates = {
     "application/json" = <<EOF
     {
-      "username" :  "$context.authorizer.claims['cognito:username']"
+        "cognito": {
+            "username":  "$context.authorizer.claims['cognito:username']",
+            "email":  "$context.authorizer.claims['email']",
+            "groups": "$context.authorizer.claims['cognito:groups']"
+            },
+            "body": $input.json('$')
     }
 EOF
   }
@@ -104,7 +109,12 @@ resource "aws_api_gateway_integration" "ocr" {
   request_templates = {
     "application/json" = <<EOF
     {
-      "username" :  "$context.authorizer.claims['cognito:username']"
+        "cognito": {
+            "username":  "$context.authorizer.claims['cognito:username']",
+            "email":  "$context.authorizer.claims['email']",
+            "groups": "$context.authorizer.claims['cognito:groups']"
+            },
+            "body": $input.json('$')
     }
 EOF
   }
@@ -148,8 +158,14 @@ resource "aws_api_gateway_integration" "prompt" {
 
   request_templates = {
     "application/json" = <<EOF
+#set($inputRoot = $input.path('$'))
     {
-      "username" :  "$context.authorizer.claims['cognito:username']"
+        "cognito": {
+            "username":  "$context.authorizer.claims['cognito:username']",
+            "email":  "$context.authorizer.claims['email']",
+            "groups": "$context.authorizer.claims['cognito:groups']"
+        },
+        "body": $input.json('$')
     }
 EOF
   }
