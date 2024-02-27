@@ -57,6 +57,22 @@ resource "aws_lambda_function" "ai-api-ocr" {
   }
 }
 
+# Prompts Handler
+resource "aws_lambda_function" "ai-api-prompts" {
+  filename         = data.archive_file.lambda.output_path
+  source_code_hash = data.archive_file.lambda.output_base64sha256
+  function_name    = "ai-api-prompts"
+  role             = aws_iam_role.lambda_api_role.arn
+  handler          = "prompt_handler.lambda_handler"
+  runtime          = "python3.12"
+  layers           = [aws_lambda_layer_version.python_layer.arn, "arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11"]
+  timeout          = 5
+  vpc_config {
+    subnet_ids         = [var.subnet_id]
+    security_group_ids = [var.sg_id]
+  }
+}
+
 # Textract Handler
 resource "aws_lambda_function" "ai-api-textract" {
   filename         = data.archive_file.lambda.output_path

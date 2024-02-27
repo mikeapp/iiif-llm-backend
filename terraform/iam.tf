@@ -40,11 +40,6 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
     resources = ["*"]
   }
   statement {
-    effect    = "Allow"
-    actions   = ["states:StartExecution"]
-    resources = [aws_sfn_state_machine.ai-api-state-machine.arn]
-  }
-  statement {
     effect = "Allow"
     actions = [
       "ec2:DescribeNetworkInterfaces",
@@ -68,9 +63,24 @@ data "aws_iam_policy_document" "lambda_api_policy_document" {
 }
 
 resource "aws_iam_role_policy" "lambda_api_policies" {
-  name   = "sender_sqs_policy"
+  name   = "lambda_api_policies"
   role   = aws_iam_role.lambda_api_role.name
   policy = data.aws_iam_policy_document.lambda_api_policy_document.json
+}
+
+
+data "aws_iam_policy_document" "sm_policy_document" {
+  statement {
+    effect    = "Allow"
+    actions   = ["states:StartExecution"]
+    resources = [aws_sfn_state_machine.ai-api-state-machine.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "sm_policy" {
+  name   = "sm_policies"
+  role   = aws_iam_role.lambda_api_role.name
+  policy = data.aws_iam_policy_document.sm_policy_document.json
 }
 
 # Role for Stap Functions
@@ -126,7 +136,8 @@ data "aws_iam_policy_document" "invocation_policy" {
     actions   = ["lambda:InvokeFunction"]
     resources = [
       aws_lambda_function.ai-api-ocr.arn,
-      aws_lambda_function.ai-api-lambda.arn
+      aws_lambda_function.ai-api-lambda.arn,
+      aws_lambda_function.ai-api-prompts.arn
     ]
   }
 }

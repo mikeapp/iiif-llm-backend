@@ -1,6 +1,7 @@
 import json
 import os
 import urllib
+import urllib.request
 
 
 def filter_array_uris(arr):

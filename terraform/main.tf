@@ -23,6 +23,7 @@ variable "subnet_id" {}
 variable "sg_id" {}
 variable "db_url" {}
 variable "secrets" {}
+variable "cognito_arn" {}
 
 # S3 bucket
 resource "aws_s3_bucket" "tmp_bucket" {

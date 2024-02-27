@@ -2,8 +2,6 @@
 
 
 TODO:
-- API Gateway
-- Authorizer
 - Check user group
 - Prompt list
 - Build document from _ocr_ table
