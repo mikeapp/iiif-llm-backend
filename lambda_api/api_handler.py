@@ -16,19 +16,19 @@ import json
 def lambda_handler(event, context):
     body = event['body']
     object_id = body['object_id']
-    # image_ids = event['image_ids']
-    # prompt_id = event['prompt_id']
+    image_ids = body['image_ids']
+    prompt_id = body['prompt_id']
     cognito = event['cognito']
 
-    auth_user(event)
+    auth_user(cognito)
     conn = get_connection()
     user = find_or_create_user(cognito, conn)
 
     # check credit balance
-    credits_used_user = get_credits_used_by_username(conn, user['username'])
+    credits_used_to_date = get_credits_used_by_username(conn, user['username'])
     credits_used = 0
-    if credits_used_user:
-        credits_used = credits_used_user['credits_used']
+    if credits_used_to_date:
+        credits_used = credits_used_to_date['credits_used']
     if credits_used > user['credits']:
         return {"error": "Credit limit exceeded"}
 
@@ -39,13 +39,9 @@ def lambda_handler(event, context):
 
     response = {
         'user': user,
-        'credits_used': credits_used,
+        'credits_used': credits_used_to_date,
         'gpt': gpt_completion,
         'titan': titan_completion
     }
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response),
-        "isBase64Encoded": False
-    }
+    return response
