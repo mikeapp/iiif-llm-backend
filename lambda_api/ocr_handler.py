@@ -16,11 +16,11 @@ def get_unprocessed_uris(conn, object_id, image_ids):
         raise RuntimeError('Manifest URI is not from Yale Digital Collections')
     manifest_info = map_manifest(object_id)
     manifest_image_ids = list(map(lambda c: c['image_id'], manifest_info['canvases']))
-    print(manifest_image_ids)
     requested_ids = set(image_ids)
     valid_image_ids = list(filter(lambda c: c in requested_ids, manifest_image_ids))
-    print(valid_image_ids)
-    unprocessed_image_ids = list(filter(lambda image_id: not get_ocr(conn, image_id, object_id), valid_image_ids))
+    ocr_entries = get_ocr(conn, valid_image_ids, object_id)
+    ocr_ids = map(lambda e: e['image_id'], ocr_entries)
+    unprocessed_image_ids = list(filter(lambda image_id: not image_id in ocr_ids , valid_image_ids))
     return unprocessed_image_ids
 
 
