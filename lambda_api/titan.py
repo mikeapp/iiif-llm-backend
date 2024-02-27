@@ -1,6 +1,7 @@
 import json
 import logging
 import boto3
+import math
 import urllib
 
 from botocore.exceptions import ClientError
@@ -39,7 +40,7 @@ def call_titan(prompt, text):
         model_id = 'amazon.titan-text-express-v1'
 
         body = json.dumps({
-            "inputText": text + "\n " + prompt ,
+            "inputText": text + "\n " + prompt,
             "textGenerationConfig": {
                 "maxTokenCount": 4096,
                 "stopSequences": [],
@@ -49,17 +50,28 @@ def call_titan(prompt, text):
         })
 
         response_body = generate_text(model_id, body)
-        print(f"Input token count: {response_body['inputTextTokenCount']}")
 
-        for result in response_body['results']:
-            print(f"Token count: {result['tokenCount']}")
-            print(f"Output text: {result['outputText']}")
-            print(f"Completion reason: {result['completionReason']}")
+        # parse data from response body
+        prompt_tokens = response_body['inputTextTokenCount']
+        completion_tokens = response_body['results'][0]['tokenCount']
+        response_text = response_body['results'][0]['outputText']
+        cost = math.ceil((prompt_tokens + completion_tokens) / 1000)
+
+        result = {
+            "text": response_text,
+            "usage": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "credits": cost
+            },
+            "response": response_body
+        }
 
     except ClientError as err:
         message = err.response["Error"]["Message"]
-        print("A client error occured: " +
-              format(message))
+        return {"error": format(message)}
+
     else:
         print(f"Finished generating text with the Amazon &titan-text-express; model {model_id}.")
-    return response_body
+
+    return result

@@ -53,8 +53,12 @@ def lambda_handler(event, context):
     doc = assemble_document(conn, image_ids, object_id)
     doc = "<doc>" + doc + "</doc>"
 
-    completion = call_gpt(prompt['prompt_text'], doc)
-    # completion = call_titan("what is the answer?", " 2 * 2")
+    if model == 'chatgpt-3.5':
+        completion = call_gpt(prompt['prompt_text'], doc)
+    elif model == 'titan-1':
+        completion = call_titan(prompt['prompt_text'], doc)
+    else:
+        raise Exception('Invalid model')
 
     credits_used_this_call = completion['usage']['credits']
     credits_remaining = user['credits'] - credits_used - credits_used_this_call
@@ -64,7 +68,6 @@ def lambda_handler(event, context):
 
     response = {
         'user': user,
-        'credits': credits_remaining,
         'completion': completion
     }
 
