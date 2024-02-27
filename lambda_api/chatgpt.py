@@ -1,4 +1,5 @@
 import json
+import math
 import urllib
 from shared_lib import get_secret
 from botocore.exceptions import ClientError
@@ -41,12 +42,24 @@ def call_gpt(prompt,text):
         # Parse JSON response
         parsed_response = json.loads(response_data)
 
+        prompt_tokens = parsed_response["usage"]["prompt_tokens"]
+        completion_tokens = parsed_response["usage"]["completion_tokens"]
+        cost = math.ceil((prompt_tokens + completion_tokens) / 1000)
+
         # Output the completion
-        response_body = parsed_response["choices"][0]["message"]["content"]
+        response_body = {
+            "text": parsed_response["choices"][0]["message"]["content"],
+            "usage": {
+              "prompt_tokens": prompt_tokens,
+              "completion_tokens": completion_tokens,
+              "credits": cost
+            },
+            "response": parsed_response
+        }
     except ClientError as err:
         message = err.response["Error"]["Message"]
-        print("A client error occured: " +
-              format(message))
+        print("A client error occured: " + format(message))
     else:
         print("Finished generating text with ChatGPT.")
+
     return response_body

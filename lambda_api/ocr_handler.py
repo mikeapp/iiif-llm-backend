@@ -65,6 +65,7 @@ def lambda_handler(event, context):
         }
         job_id = start_state_machine(job_input)
 
+    conn.close()
     response = {
         'user': user,
         'credits_used': cost,
