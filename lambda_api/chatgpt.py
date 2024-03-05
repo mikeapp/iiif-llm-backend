@@ -5,8 +5,13 @@ from shared_lib import get_secret
 from botocore.exceptions import ClientError
 
 
-def call_gpt(prompt,text):
+def call_gpt(prompt,text, model):
     response_body = []
+    gptModel = "gpt-3.5-turbo"
+    costModifier = 1
+    if model == "chatgpt-4":
+        gptModel = "gpt-4-turbo-preview"
+        costModifier = 5
     api_url = "https://api.openai.com/v1/chat/completions"
     api_key = get_secret("ai/chatGPT")["key"]
     if not api_key.endswith('b'):
@@ -17,7 +22,7 @@ def call_gpt(prompt,text):
             "Authorization": f"Bearer {api_key}"
         }
         body = {
-            "model": "gpt-3.5-turbo",
+            "model": gptModel,
             "messages": [
                 {
                     "role": "system",
@@ -44,7 +49,7 @@ def call_gpt(prompt,text):
 
         prompt_tokens = parsed_response["usage"]["prompt_tokens"]
         completion_tokens = parsed_response["usage"]["completion_tokens"]
-        cost = math.ceil((prompt_tokens + completion_tokens) / 1000)
+        cost = math.ceil((prompt_tokens + completion_tokens) / 1000) * costModifier
 
         # Output the completion
         response_body = {

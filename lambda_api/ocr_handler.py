@@ -18,9 +18,11 @@ def get_unprocessed_uris(conn, object_id, image_ids):
     manifest_image_ids = list(map(lambda c: c['image_id'], manifest_info['canvases']))
     requested_ids = set(image_ids)
     valid_image_ids = list(filter(lambda c: c in requested_ids, manifest_image_ids))
+    unprocessed_image_ids = valid_image_ids
     ocr_entries = get_ocr(conn, valid_image_ids, object_id)
-    ocr_ids = map(lambda e: e['image_id'], ocr_entries)
-    unprocessed_image_ids = list(filter(lambda image_id: not image_id in ocr_ids , valid_image_ids))
+    if ocr_entries is not None:
+        ocr_ids = map(lambda e: e['image_id'], ocr_entries)
+        unprocessed_image_ids = list(filter(lambda image_id: not image_id in ocr_ids , valid_image_ids))
     return unprocessed_image_ids
 
 

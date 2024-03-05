@@ -53,8 +53,8 @@ def lambda_handler(event, context):
     doc = assemble_document(conn, image_ids, object_id)
     doc = "<doc>" + doc + "</doc>"
 
-    if model == 'chatgpt-3.5':
-        completion = call_gpt(prompt['prompt_text'], doc)
+    if model == 'chatgpt-3.5' or model == 'chatgpt-4':
+        completion = call_gpt(prompt['prompt_text'], doc, model)
     elif model == 'titan-1':
         completion = call_titan(prompt['prompt_text'], doc)
     else:
@@ -63,7 +63,7 @@ def lambda_handler(event, context):
     credits_used_this_call = completion['usage']['credits']
     credits_remaining = user['credits'] - credits_used - credits_used_this_call
     user['credits'] = credits_remaining
-    insert_activity_record(conn, user['username'], object_id, "ChatGPT", credits_used_this_call)
+    insert_activity_record(conn, user['username'], object_id, model, credits_used_this_call)
     conn.close()
 
     response = {
