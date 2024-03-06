@@ -15,15 +15,14 @@ def get_unprocessed_uris(conn, object_id, image_ids):
     if not object_id.startswith('https://collections.library.yale.edu/manifests/'):
         raise RuntimeError('Manifest URI is not from Yale Digital Collections')
     manifest_info = map_manifest(object_id)
-    manifest_image_ids = list(map(lambda c: c['image_id'], manifest_info['canvases']))
+    manifest_image_ids = set(map(lambda c: c['image_id'], manifest_info['canvases']))
     requested_ids = set(image_ids)
-    valid_image_ids = list(filter(lambda c: c in requested_ids, manifest_image_ids))
-    unprocessed_image_ids = valid_image_ids
-    ocr_entries = get_ocr(conn, valid_image_ids, object_id)
+    valid_image_ids = requested_ids.intersection(manifest_image_ids)
+    ocr_entries = get_ocr(conn, object_id)
+    ocr_ids = set([])
     if ocr_entries is not None:
-        ocr_ids = map(lambda e: e['image_id'], ocr_entries)
-        unprocessed_image_ids = list(filter(lambda image_id: not image_id in ocr_ids , valid_image_ids))
-    return unprocessed_image_ids
+        ocr_ids = set(map(lambda e: e['image_id'], ocr_entries))
+    return list(valid_image_ids.difference(ocr_ids))
 
 
 def start_state_machine(input):
@@ -36,9 +35,20 @@ def start_state_machine(input):
     )
     return response['executionArn']
 
+def check_state_machine(arn):
+    session = boto3.Session()
+    step_client = session.client('stepfunctions')
+    response = step_client.describe_execution(executionArn=arn)
+    return response['status']
 
 def lambda_handler(event, context):
     body = event['body']
+    # if status check
+    if body['arn']:
+        return {
+            "status": check_state_machine(body['arn'])
+        }
+
     object_id = body['object_id']
     image_ids = filter_array_uris(body['image_ids'])
     cognito = event['cognito']

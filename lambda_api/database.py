@@ -130,11 +130,11 @@ def insert_ocr_record(conn, image_id, object_id, text_engine='TEXTRACT', text_co
         cursor.close()
 
 
-def get_ocr(conn, image_ids, object_id, text_engine='TEXTRACT'):
+def get_ocr(conn, object_id, text_engine='TEXTRACT'):
     try:
         cursor = conn.cursor()
-        sql = """SELECT object_id, image_id, text_engine, text_content FROM ocr WHERE object_id = %s AND text_engine = %s AND image_id in (SELECT unnest(CAST(%s as varchar[])))"""
-        cursor.execute(sql, (object_id, text_engine, image_ids))
+        sql = """SELECT object_id, image_id, text_engine, text_content FROM ocr WHERE object_id = %s AND text_engine = %s"""
+        cursor.execute(sql, (object_id, text_engine))
         record = cursor.fetchall()
         if record:
             return list_to_dicts(cursor, record)
