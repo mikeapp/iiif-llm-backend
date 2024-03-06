@@ -72,8 +72,11 @@ resource "aws_iam_role_policy" "lambda_api_policies" {
 data "aws_iam_policy_document" "sm_policy_document" {
   statement {
     effect    = "Allow"
-    actions   = ["states:StartExecution"]
-    resources = [aws_sfn_state_machine.ai-api-state-machine.arn]
+    actions   = ["states:StartExecution", "states:DescribeExecution"]
+    resources = [
+      aws_sfn_state_machine.ai-api-state-machine.arn,
+      "arn:aws:states:{region}:{account_id}:execution:ai-api-text-state-machine:*"
+    ]
   }
 }
 

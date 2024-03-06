@@ -18,6 +18,11 @@ data "aws_region" "current" {
   provider = aws.current
 }
 
+data "aws_caller_identity" "current" {}
+
+output "account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
 
 variable "subnet_id" {}
 variable "sg_id" {}
