@@ -44,9 +44,9 @@ def check_state_machine(arn):
 def lambda_handler(event, context):
     body = event['body']
     # if status check
-    if body['arn']:
+    if 'job_id' in body:
         return {
-            "status": check_state_machine(body['arn'])
+            "status": check_state_machine(body['job_id'])
         }
 
     object_id = body['object_id']
