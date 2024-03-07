@@ -14,7 +14,7 @@ import json
 
 
 def assemble_document(conn, image_ids, object_id):
-    ocr = get_ocr(conn, image_ids, object_id)
+    ocr = get_ocr(conn, object_id)
     if ocr is None:
         raise Exception("No OCR")
     pages = {}

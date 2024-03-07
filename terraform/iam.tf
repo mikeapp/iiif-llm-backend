@@ -75,7 +75,7 @@ data "aws_iam_policy_document" "sm_policy_document" {
     actions   = ["states:StartExecution", "states:DescribeExecution"]
     resources = [
       aws_sfn_state_machine.ai-api-state-machine.arn,
-      "arn:aws:states:{region}:{account_id}:execution:ai-api-text-state-machine:*"
+      "arn:aws:states:${data.aws_region.current.id}:${local.account_id}:execution:ai-api-text-state-machine:*"
     ]
   }
 }
